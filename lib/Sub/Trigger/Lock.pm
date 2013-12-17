@@ -7,7 +7,7 @@ package Sub::Trigger::Lock;
 our $AUTHORITY = 'cpan:TOBYINK';
 our $VERSION   = '0.001';
 
-use Scope::Guard qw( guard )
+use Scope::Guard qw( guard );
 use Exporter::Tiny qw( );
 
 our @ISA = qw(Exporter::Tiny);
@@ -88,32 +88,32 @@ Sub::Trigger::Lock - a coderef for use in Moose triggers that will lock hashrefs
 
 This module provides the antidote for:
 
-	package Foo {
-		use Moose;
-		
-		has bar => (is => 'ro', isa => 'ArrayRef');
-	}
-	
-	my $foo = Foo->new( bar => [1,2,3] );
-	push @{ $foo->bar }, 4;   # does not die!
+   package Foo {
+      use Moose;
+      
+      has bar => (is => 'ro', isa => 'ArrayRef');
+   }
+   
+   my $foo = Foo->new( bar => [1,2,3] );
+   push @{ $foo->bar }, 4;   # does not die!
 
 All you need to do is:
 
-	package Foo {
-		use Moose;
-		use Sub::Trigger::Lock;
-		
-		has bar => (is => 'ro', isa => 'ArrayRef', trigger => Lock);
-	}
+   package Foo {
+      use Moose;
+      use Sub::Trigger::Lock;
+      
+      has bar => (is => 'ro', isa => 'ArrayRef', trigger => Lock);
+   }
 
 Or, a shortcut:
 
-	package Foo {
-		use Moose;
-		use Sub::Trigger::Lock qw(RO);
-		
-		has bar => (is => RO, isa => 'ArrayRef');
-	}
+   package Foo {
+      use Moose;
+      use Sub::Trigger::Lock qw(RO);
+      
+      has bar => (is => RO, isa => 'ArrayRef');
+   }
 
 =head1 DESCRIPTION
 
@@ -149,40 +149,40 @@ unaffected.
 
 Overall, the effect of C<Lock> is that you can do something like this:
 
-	package Person {
-		use Moose;
-		
-		has name => (is => 'ro', writer => 'set_name');
-	}
-	
-	package Band {
-		use Moose;
-		use Sub::Trigger::Lock;
-		
-		has members => (is => 'ro', trigger => Lock);
-	}
-	
-	my $spice_girls = Band->new(
-		members => [
-			Person->new(name => 'Victoria Adams'),
-			Person->new(name => 'Melanie Brown'),
-			Person->new(name => 'Emma Bunton'),
-			Person->new(name => 'Melanie Chisholm'),
-			Person->new(name => 'Geri Halliwell'),
-		],
-	);
-	
-	# This is OK, because deep changes work
-	$spice_girls->members->[0]->set_name('Victoria Beckham');
-	
-	# This is not OK, because shallow changes throw!
-	$spice_girls->members->[0] = Person->new(name => 'Johnny Cash');
+   package Person {
+      use Moose;
+      
+      has name => (is => 'ro', writer => 'set_name');
+   }
+   
+   package Band {
+      use Moose;
+      use Sub::Trigger::Lock;
+      
+      has members => (is => 'ro', trigger => Lock);
+   }
+   
+   my $spice_girls = Band->new(
+      members => [
+         Person->new(name => 'Victoria Adams'),
+         Person->new(name => 'Melanie Brown'),
+         Person->new(name => 'Emma Bunton'),
+         Person->new(name => 'Melanie Chisholm'),
+         Person->new(name => 'Geri Halliwell'),
+      ],
+   );
+   
+   # This is OK, because deep changes work
+   $spice_girls->members->[0]->set_name('Victoria Beckham');
+   
+   # This is not OK, because shallow changes throw!
+   $spice_girls->members->[0] = Person->new(name => 'Johnny Cash');
 
 =item C<< RO >>
 
 C<RO> is a constant that evaluates to the list:
 
-	is => 'ro', trigger => Lock,
+   is => 'ro', trigger => Lock,
 
 =item C<< lock($ref) >>
 
@@ -201,18 +201,18 @@ locked again!
 This allows you to temporarily unlock a hashref or arrayref in order
 to privately manipulate it:
 
-	package Band {
-		use Moose;
-		use Sub::Trigger::Lock qw( Lock unlock );
-		
-		has members => (is => 'ro', trigger => Lock);
-		
-		sub add_members {
-			my ($self, @members) = @_;
-			my $guard = unlock( $self->members );
-			push @{$self->members}, @members;
-		}
-	}
+   package Band {
+      use Moose;
+      use Sub::Trigger::Lock qw( Lock unlock );
+      
+      has members => (is => 'ro', trigger => Lock);
+      
+      sub add_members {
+         my ($self, @members) = @_;
+         my $guard = unlock( $self->members );
+         push @{$self->members}, @members;
+      }
+   }
 
 =back
 
