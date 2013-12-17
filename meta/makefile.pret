@@ -3,7 +3,13 @@
 @prefix : <http://ontologi.es/doap-deps#>.
 
 `Sub-Trigger-Lock`
+	:runtime-requirement    [ :on "Exporter::Tiny"^^:CpanId ];
+	:runtime-requirement    [ :on "Scope::Guard"^^:CpanId ];
 	:test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
+	:test-requirement       [ :on "Test::Fatal"^^:CpanId ];
+	:test-requirement       [ :on "Test::Requires"^^:CpanId ];
+	:test-recommendation    [ :on "Moose 2.0600"^^:CpanId ];
+	:test-recommendation    [ :on "Moo 1.003000"^^:CpanId ];
 	:develop-recommendation [ :on "Dist::Inkt 0.001"^^:CpanId ];
 	.
 
