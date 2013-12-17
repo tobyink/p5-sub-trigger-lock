@@ -36,37 +36,30 @@ sub _lock {
 	return;
 }
 
-sub _generate_Lock {
-	my $me   = shift;
-	my $func = $me->can('_lock');
-	sub () { $func };
+sub Lock () {
+	\&_lock;
 }
 
-sub _generate_RO {
-	my $me   = shift;
-	my $func = $me->can('_lock');
-	my @ro   = ( is => 'ro', trigger => $func );
-	sub () { @ro };
+sub RO () {
+	'ro', 'trigger', Lock;
 }
 
-sub lock {
+sub lock ($) {
 	_lock(undef, @_);
 }
 
-sub unlock {
+sub unlock ($) {
 	my $ref = shift;
 	
 	if ( ref($ref) eq 'ARRAY' ) {
 		&Internals::SvREADONLY( $ref, 0 );
 		&Internals::SvREADONLY( \$_, 0 ) for @$ref;
-		return;
 	}
 	
 	if ( ref($_[1]) eq 'HASH' ) {
 		&Internals::hv_clear_placeholders($ref);
 		&Internals::SvREADONLY( $ref, 0 );
 		&Internals::SvREADONLY( \$_, 0 ) for values %$ref;
-		return;
 	}
 	
 	return guard { _lock(undef, $ref) };
@@ -114,6 +107,11 @@ Or, a shortcut:
       
       has bar => (is => RO, isa => 'ArrayRef');
    }
+
+=head1 TL;DR
+
+Force modifications of your arrayref/hashref attributes to be made via
+your documented API.
 
 =head1 DESCRIPTION
 
@@ -182,7 +180,7 @@ Overall, the effect of C<Lock> is that you can do something like this:
 
 C<RO> is a constant that evaluates to the list:
 
-   is => 'ro', trigger => Lock,
+   'ro', 'trigger', Lock,
 
 =item C<< lock($ref) >>
 
@@ -216,6 +214,12 @@ to privately manipulate it:
 
 =back
 
+=head1 IMPLEMENTATION NOTES
+
+This module uses the Perl internal C<< Internals::SvREADONLY >>
+function for most of the heavy lifting. This is much, much faster
+than ties.
+
 =head1 BUGS
 
 Please report any bugs to
@@ -223,7 +227,7 @@ L<http://rt.cpan.org/Dist/Display.html?Queue=Sub-Trigger-Lock>.
 
 =head1 SEE ALSO
 
-L<Const::Fast>, L<Exporter::Tiny>, L<Scope::Guard>.
+L<Exporter::Tiny>, L<Scope::Guard>.
 
 =head1 AUTHOR
 
