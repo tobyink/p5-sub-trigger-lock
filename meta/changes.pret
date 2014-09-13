@@ -4,3 +4,8 @@
 	issued  2014-01-01;
 	label   "Initial release".
 
+`Sub-Trigger-Lock 0.002 cpan:TOBYINK`
+	issued  2014-09-13;
+	changeset [
+		item "Add link to repo."^^Packaging;
+	].

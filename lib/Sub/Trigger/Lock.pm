@@ -5,7 +5,7 @@ use warnings;
 package Sub::Trigger::Lock;
 
 our $AUTHORITY = 'cpan:TOBYINK';
-our $VERSION   = '0.001';
+our $VERSION   = '0.002';
 
 use Scope::Guard qw( guard );
 use Exporter::Tiny qw( );
