@@ -1,0 +1,76 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use TOBYINK::Pod::HTML;
+
+my $pod2html = "TOBYINK::Pod::HTML"->new(
+	pretty             => 1,       # nicely indented HTML
+	code_highlighting  => 1,       # use PPI::HTML
+	code_line_numbers  => 0,
+);
+
+print $pod2html->file_to_html(__FILE__);
+
+=pod
+
+=encoding utf-8
+
+=head1 Introducing Sub::Trigger::Lock
+
+L<Sub::Trigger::Lock> is a workaround for the problem that L<Moose>
+read-only attributes aren't really read-only; at least, not in the way
+that people might expect them to be. Here's an example:
+
+   package Foo {
+      use Moose;
+      
+      has bar => (is => 'ro', isa => 'ArrayRef');
+   }
+   
+   my $foo = Foo->new( bar => [1,2,3] );
+   push @{ $foo->bar }, 4;   # does not die!
+
+A read-only attribute containing an arrayref of hashref cannot have the
+attribute changed to reference another array or hash. However, the
+contents of that array or hash are not magically read-only.
+
+Sub::Trigger::Lock can make them magically read-only.
+
+   package Foo {
+      use Moose;
+      use Sub::Trigger::Lock;
+      
+      has bar => (is => 'ro', isa => 'ArrayRef', trigger => Lock);
+   }
+   
+   my $foo = Foo->new( bar => [1,2,3] );
+   push @{ $foo->bar }, 4;   # kablammo!
+
+Sub::Trigger::Lock also contains various utility functions for
+temporarily unlocking and re-locking the array, which allows the
+C<Foo> method to provide its own API for altering the array:
+
+   package Foo {
+      use Moose;
+      use Sub::Trigger::Lock -all;
+      
+      has bar => (is => 'ro', isa => 'ArrayRef', trigger => Lock);
+      
+      sub bar_append {
+         my $self  = shift;
+         my $guard = unlock $self->bar;
+         push @{ $self->bar }, @_;
+      }
+   }
+   
+   my $foo = Foo->new( bar => [1,2,3] );
+   $foo->bar_append(4);      # ok
+   push @{ $foo->bar }, 5;   # kablammo!
+
+That's about it. Sub::Trigger::Lock allows you to stop people from
+altering your object's hashrefs and arrayrefs from underneath it. It
+forces them (or at least strongly encourages them) to use your API to
+alter your object's attributes.
+
+=cut
